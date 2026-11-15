@@ -28,6 +28,8 @@ from app.schemas.evidence_fusion import (
     ModelInferenceEvidence,
     ModelInferenceStatus,
 )
+from app.core.config import settings
+from app.services.dkim_crypto_verifier import LocalKeyStore, verify_dkim_signatures
 from app.services.email_authentication import analyze_email_authentication
 from app.services.evidence_fusion import fuse_evidence
 from app.services.ip_extractor import extract_ip_candidates_from_received_headers
@@ -441,6 +443,16 @@ def parse_email_message(file_bytes: bytes, filename: str) -> EmailAnalysisRespon
     except Exception as auth_err:
         warnings.append(f"Email authentication analysis non-fatal warning: {str(auth_err)}")
         auth_analysis = None
+
+    # 6b. Offline cryptographic DKIM verification (body hash + pinned-key signature check)
+    if auth_analysis is not None:
+        try:
+            _keystore = LocalKeyStore(settings.DKIM_KEYSTORE_PATH)
+            auth_analysis.dkim_crypto = [
+                r.to_dict() for r in verify_dkim_signatures(file_bytes, _keystore)
+            ]
+        except Exception as crypto_err:
+            warnings.append(f"DKIM cryptographic verification non-fatal warning: {str(crypto_err)}")
 
     # 7. IP Intelligence Engine (Phase 6A)
     try:

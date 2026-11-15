@@ -48,14 +48,27 @@ upload_temp/
 models/
 *.safetensors
 *.bin
+*.pt
+*.onnx
+
+# Environment & Secrets
+.env
+.env.*
+*.env
+*.log
+
+# Backups & Temporary Scripts
+*.bak
+*.bak_*
+*.bak_dkim
+/.py
+/apply_dkim_patch.py
 
 # Local datasets - keep out of GitHub
 /data/
-
 
 # Original personal email samples - keep local
 /backend/tests/fixtures/google_notification.eml
 /backend/tests/fixtures/openai_privacy_policy.eml
 /backend/tests/fixtures/overleaf_welcome.eml
 /backend/tests/fixtures/pinterest_terms_update.eml
-

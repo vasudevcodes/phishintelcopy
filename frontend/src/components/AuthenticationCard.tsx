@@ -196,6 +196,45 @@ export const AuthenticationCard: FC<AuthenticationCardProps> = ({ auth }) => {
             <p className="text-xs text-slate-600 mt-2.5 leading-relaxed">
               {auth.dkim.explanation}
             </p>
+
+            {auth.dkim_crypto && auth.dkim_crypto.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-slate-200 space-y-2">
+                <div className="text-[11px] font-semibold uppercase tracking-wider text-navy-900">
+                  Offline Cryptographic Verification
+                </div>
+                {auth.dkim_crypto.map((c, i) => (
+                  <div key={i} className="text-xs text-slate-700 space-y-0.5">
+                    <div>
+                      <span
+                        className={`px-2 py-0.5 rounded-md text-[11px] font-bold border ${
+                          c.status === 'VERIFIED'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : c.status === 'BODY_MODIFIED' || c.status === 'SIGNATURE_INVALID'
+                              ? 'bg-red-50 text-red-800 border-red-200'
+                              : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        {c.status}
+                      </span>
+                      <span className="ml-2 font-mono break-all">{c.domain || ''}</span>
+                    </div>
+                    <div>
+                      Body hash (bh=):{' '}
+                      <span className="font-mono">
+                        {c.body_hash_valid === true ? 'match' : c.body_hash_valid === false ? 'MISMATCH' : 'n/a'}
+                      </span>
+                      {' | '}Signature (b=):{' '}
+                      <span className="font-mono">
+                        {c.signature_valid === true ? 'valid' : c.signature_valid === false ? 'INVALID' : 'not checked (no pinned key)'}
+                      </span>
+                    </div>
+                    {c.notes && c.notes.length > 0 && (
+                      <div className="text-[11px] text-slate-500">{c.notes.join(' ')}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {auth.dkim.trust_limitation && (

@@ -218,7 +218,24 @@ export interface DMARCEvidence {
   trust_limitation?: string | null;
 }
 
+export interface DKIMCryptoResult {
+  status: string;
+  domain?: string | null;
+  selector?: string | null;
+  algorithm?: string | null;
+  canonicalization?: string | null;
+  body_hash_valid?: boolean | null;
+  signature_valid?: boolean | null;
+  key_source?: string | null;
+  key_bits?: number | null;
+  aligned_with_from?: boolean | null;
+  covers_from_header?: boolean | null;
+  weak_algorithm?: boolean;
+  notes?: string[];
+}
+
 export interface EmailAuthenticationAnalysis {
+  dkim_crypto?: DKIMCryptoResult[] | null;
   status: OverallAuthStatus;
   spf: SPFEvidence;
   dkim: DKIMEvidence;

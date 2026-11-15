@@ -180,10 +180,14 @@ class EmailAuthenticationAnalysis(BaseModel):
             "TRUSTED_RECEIVER_EVIDENCE is reserved for future infrastructure-level integration only."
         ),
     )
+    dkim_crypto: Optional[List[Dict[str, Any]]] = Field(
+        None,
+        description="Offline cryptographic DKIM verification (RFC 6376): body-hash recomputation and signature verification against locally pinned public keys. No DNS queries are made.",
+    )
     disclaimer: str = Field(
         default=(
             "Authentication evidence reflects downstream MTA header assertions (RFC 8601/RFC 7208). "
-            "Phase 5A does not perform live DNS queries, fetch public keys, or cryptographically verify DKIM signatures. "
+            "Phase 5A does not perform live DNS queries or fetch public keys; DKIM signatures are verified offline only against locally pinned keys (see dkim_crypto). "
             "For offline .eml uploads, all authentication assertions are REPORTED — their origin cannot be independently "
             "established. An authserv-id matching a known mail gateway (e.g. mx.google.com) does NOT prove the header "
             "originated from that gateway; the string can be trivially forged by any sender."

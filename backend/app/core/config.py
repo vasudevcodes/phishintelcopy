@@ -2,6 +2,7 @@
 Configuration module for PhishIntel Backend (Phase 1).
 """
 
+from pathlib import Path
 from typing import List
 
 
@@ -16,6 +17,8 @@ class Settings:
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
+    # Offline DKIM verification: pinned public keys (no network at runtime)
+    DKIM_KEYSTORE_PATH: Path = Path(__file__).resolve().parents[1] / "data" / "dkim_keys.json"
     TRUSTED_AUTHSERV_DOMAINS: List[str] = [
         "google.com",
         "mx.google.com",
