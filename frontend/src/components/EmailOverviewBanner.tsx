@@ -143,23 +143,6 @@ export const EmailOverviewBanner: FC<EmailOverviewBannerProps> = ({ data, onRese
                         : 'Minimal Evidence'}
                   </span>
                 )}
-
-                {/* Evidence Fusion Risk Score Badge */}
-                {fusion && fusion.overall_risk_score !== undefined && (
-                  <span
-                    className={`inline-flex items-center text-xs px-3 py-0.5 rounded-full font-mono font-bold border ${
-                      fusion.overall_category === 'HIGH_RISK_INDICATORS_PRESENT'
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : fusion.overall_category === 'REVIEW_RECOMMENDED'
-                        ? 'bg-amber-50 text-amber-800 border-amber-200'
-                        : fusion.overall_category === 'LOW_RISK_INDICATORS'
-                        ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                        : 'bg-slate-100 text-slate-700 border-slate-200'
-                    }`}
-                  >
-                    Risk Score: {fusion.overall_risk_score}/100
-                  </span>
-                )}
               </div>
 
               <div className="flex items-center space-x-4 text-xs text-slate-500 mt-1.5 flex-wrap gap-y-1">
@@ -175,6 +158,44 @@ export const EmailOverviewBanner: FC<EmailOverviewBannerProps> = ({ data, onRese
               </div>
             </div>
           </div>
+
+          {/* Risk gauge */}
+          {fusion && fusion.overall_risk_score !== undefined && (
+            <div
+              className="flex items-center gap-3 lg:ml-auto lg:mr-4 self-start lg:self-center"
+              role="img"
+              aria-label={`Overall risk score ${fusion.overall_risk_score} out of 100`}
+            >
+              <svg viewBox="0 0 44 44" className="w-14 h-14 -rotate-90">
+                <circle cx="22" cy="22" r="18" fill="none" strokeWidth="4" className="stroke-slate-100" />
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="18"
+                  fill="none"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  strokeDasharray={`${(Math.min(Math.max(fusion.overall_risk_score, 0), 100) / 100) * 113.1} 113.1`}
+                  className={
+                    fusion.overall_category === 'HIGH_RISK_INDICATORS_PRESENT'
+                      ? 'stroke-red-500'
+                      : fusion.overall_category === 'REVIEW_RECOMMENDED'
+                        ? 'stroke-amber-500'
+                        : fusion.overall_category === 'LOW_RISK_INDICATORS'
+                          ? 'stroke-emerald-500'
+                          : 'stroke-slate-400'
+                  }
+                />
+              </svg>
+              <div className="leading-tight">
+                <div className="text-2xl font-semibold font-mono text-navy-900">
+                  {fusion.overall_risk_score}
+                  <span className="text-sm text-slate-400">/100</span>
+                </div>
+                <div className="text-[11px] text-slate-500">Fused risk score</div>
+              </div>
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-2.5 self-start lg:self-center flex-wrap gap-y-2">

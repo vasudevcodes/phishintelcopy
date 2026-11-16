@@ -114,18 +114,30 @@ export const UploadZone: FC<UploadZoneProps> = ({
     }
   };
 
+  const openPicker = () => {
+    if (!isLoading) fileInputRef.current?.click();
+  };
+
   return (
-    <div className="w-full max-w-3xl mx-auto my-4">
+    <div className="w-full">
       <div
+        role="button"
+        tabIndex={isLoading ? -1 : 0}
+        aria-label="Upload an .eml file for analysis"
+        aria-busy={isLoading}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        onClick={() => !isLoading && fileInputRef.current?.click()}
-        className={`relative border-2 border-dashed rounded-2xl p-8 sm:p-12 text-center transition-all cursor-pointer bg-white shadow-card ${
-          isDragOver
-            ? 'border-brand-500 bg-brand-50/40 ring-4 ring-brand-100 scale-[1.005]'
-            : 'border-slate-300 hover:border-brand-400 hover:bg-slate-50/60'
-        } ${isLoading ? 'pointer-events-none opacity-80 cursor-wait' : ''}`}
+        onClick={openPicker}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openPicker();
+          }
+        }}
+        className={`relative overflow-hidden rounded-2xl p-1.5 transition-all cursor-pointer bg-white shadow-card ${
+          isDragOver ? 'shadow-ring-brand ring-2 ring-brand-500' : 'hover:shadow-card-hover'
+        } ${isLoading ? 'pointer-events-none cursor-wait' : ''}`}
       >
         <input
           id="email-file-input"
@@ -137,65 +149,78 @@ export const UploadZone: FC<UploadZoneProps> = ({
           disabled={isLoading}
         />
 
-        <div className="flex flex-col items-center justify-center space-y-4">
-          <div
-            className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-transform ${
-              isDragOver
-                ? 'scale-110 bg-brand-100 text-brand-700'
-                : 'bg-slate-100 text-brand-600'
-            }`}
-          >
-            {isLoading ? (
-              <Loader2 className="w-7 h-7 text-brand-600 animate-spin" />
-            ) : (
-              <UploadCloud className="w-7 h-7 text-brand-600" />
-            )}
+        {isLoading && (
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-brand-100 overflow-hidden" aria-hidden="true">
+            <div className="h-full w-1/4 bg-brand-500 animate-scan" />
           </div>
+        )}
 
-          <div className="space-y-1.5 max-w-md mx-auto">
-            <h3 className="text-base sm:text-lg font-semibold text-navy-900">
-              {isLoading
-                ? `Analyzing ${uploadFileName || 'email'}...`
-                : 'Upload email file for investigation'}
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-              Drag and drop your <code className="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-100 text-navy-900 font-semibold">.eml</code> file here, or{' '}
-              <span className="text-brand-600 font-medium underline underline-offset-2 hover:text-brand-700">
-                browse from your computer
-              </span>
-            </p>
-          </div>
+        <div
+          className={`rounded-xl border border-dashed px-6 py-10 sm:py-14 text-center transition-colors ${
+            isDragOver ? 'border-brand-500 bg-brand-50/60' : 'border-slate-300 bg-slate-50/50'
+          }`}
+        >
+          <div className="flex flex-col items-center gap-5">
+            <div
+              className={`w-14 h-14 rounded-xl flex items-center justify-center bg-white ring-1 transition-transform ${
+                isDragOver ? 'scale-110 ring-brand-300' : 'ring-slate-200 shadow-subtle'
+              }`}
+            >
+              {isLoading ? (
+                <Loader2 className="w-6 h-6 text-brand-600 animate-spin" />
+              ) : (
+                <UploadCloud className="w-6 h-6 text-brand-600" />
+              )}
+            </div>
 
-          {/* Validation Constraints Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs text-slate-500">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-              <FileText className="w-3.5 h-3.5 mr-1.5 text-slate-500" />
-              RFC 5322 (.eml)
-            </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
-              Max size: 10 MB
-            </span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200">
-              <Shield className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
-              100% Offline &amp; Isolated
-            </span>
-          </div>
-
-          {isLoading && (
-            <div className="w-full max-w-xs pt-2">
-              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                <div className="h-full bg-brand-500 rounded-full animate-pulse w-3/4" />
-              </div>
-              <p className="text-[11px] text-slate-400 mt-2 font-mono">
-                Extracting transit hops, evaluating DistilBERT inference, and verifying signatures...
+            <div className="space-y-1.5 max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-navy-900 tracking-tight">
+                {isLoading
+                  ? `Analyzing ${uploadFileName || 'email'}…`
+                  : isDragOver
+                    ? 'Release to begin analysis'
+                    : 'Drop an email to investigate'}
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed">
+                {isLoading ? (
+                  'Reconstructing transit hops, scoring text with DistilBERT and verifying signatures.'
+                ) : (
+                  <>
+                    Drag a{' '}
+                    <code className="font-mono text-xs px-1.5 py-0.5 rounded bg-white ring-1 ring-slate-200 text-navy-900 font-medium">
+                      .eml
+                    </code>{' '}
+                    file here, or{' '}
+                    <span className="text-brand-600 font-medium underline underline-offset-4 decoration-brand-300">
+                      browse your computer
+                    </span>
+                  </>
+                )}
               </p>
             </div>
-          )}
+
+            <ul className="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-600">
+              <li className="inline-flex items-center px-2.5 py-1 rounded-md bg-white ring-1 ring-slate-200">
+                <FileText className="w-3.5 h-3.5 mr-1.5 text-slate-400" />
+                RFC 5322 (.eml)
+              </li>
+              <li className="inline-flex items-center px-2.5 py-1 rounded-md bg-white ring-1 ring-slate-200">
+                Up to 10 MB
+              </li>
+              <li className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 ring-1 ring-emerald-200 text-emerald-800">
+                <Shield className="w-3.5 h-3.5 mr-1.5 text-emerald-600" />
+                Offline &amp; isolated
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
       {errorMessage && (
-        <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-200 text-red-900 flex items-start space-x-3 text-sm shadow-subtle">
+        <div
+          role="alert"
+          className="mt-4 p-4 rounded-xl bg-red-50 ring-1 ring-red-200 text-red-900 flex items-start gap-3 text-sm animate-fade-in"
+        >
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
             <span className="font-semibold text-red-800">Ingestion notice: </span>
